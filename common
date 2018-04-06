@@ -6,7 +6,7 @@ msg () {
     done
 }
 
-fatal () { msg "$@" ; exit 1 ; }
+fatal () { msg "$@" ; usage ; exit 1 ; }
 
 tempdir () {
     : ${TMPDIR:="/tmp"}

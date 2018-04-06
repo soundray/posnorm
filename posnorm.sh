@@ -12,6 +12,14 @@ trap 'rm -r $td' 0 1 2 3 13 15
 
 export PATH=~/software/mirtk/build/lib/tools:$PATH
 
+usage () {
+    msg "
+
+    Usage: $pn -img 3d-image.nii.gz -mask mask.nii.gz -dof output.dof.gz [-msp mid-sagittal-plane.nii.gz]
+    
+    "
+}
+
 center () {
     f=$1 ; shift
     out=$1 ; shift
@@ -44,9 +52,44 @@ flipreg () {
     bisect-dof rreg-input-reflected.dof.gz $output
 }
 
-img=$(normalpath $1) ; shift
-mask=$(normalpath $1) ; shift
-outdof=$(normalpath $1) ; shift
+midplane () {
+    ltr=$1 ; shift
+    lout=$1 ; shift
+    seg_maths $ltr -add 1 tr
+    read minx maxx miny maxy minz maxz <<< $(seg_stats tr -B)
+    n=$[$maxx/2]
+    extract-image-region $ltr $lout -Rx1 $n -Rx2 $n -Ry1 $miny -Ry2 $maxy -Rz1 $minz -Rz2 $maxz # -Rt1 $mint -Rt2 $maxt
+}
+
+
+[[ $# -eq 0 ]] && fatal "Parameter error" 
+    
+while [[ $# -gt 0 ]]
+do
+    case "$1" in
+        -img)               img=$(normalpath "$2"); shift;;
+        -mask)             mask=$(normalpath "$2"); shift;;
+        -dof)            outdof=$(normalpath "$2"); shift;;
+        -msp)               msp=$(normalpath "$2"); shift;;
+        -debug)           debug=1 ;;
+        --) shift; break;;
+        -*)
+            fatal "Parameter error" ;;
+        *)  break;;
+    esac
+    shift
+done
+if [[ $# -gt 0 ]]
+then
+    if [[ $# -eq 3 ]] ## old-style invocation 
+    then
+	img=$(normalpath $1) ; shift
+	mask=$(normalpath $1) ; shift
+	outdof=$(normalpath $1) ; shift
+    else
+	fatal "Parameter error" 
+    fi
+fi
 
 test -e $img || fatal "posnorm input file does not exist"
 
@@ -58,7 +101,7 @@ calculate-element-wise $img -mask $mask 0 -pad 0 -o masked.nii.gz
 center masked.nii.gz prepped.nii.gz center1.dof.gz
 
 # Subsample
-resample-image prepped.nii.gz resampled.nii.gz -size 3 3 3 -interp "Fast cubic bspline with padding"
+resample-image prepped.nii.gz resampled.nii.gz -size 3 3 3 -interp "Fast cubic bspline with padding" -padding 0
 smooth-image resampled.nii.gz blurred.nii.gz 3
 
 # Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
@@ -66,6 +109,16 @@ flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs center1.dof.gz mspalign.dof.gz $outdof
 
-# cd - ; cp -a $td .
+if [[ ! -z $msp ]] ; then
+    transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast linear with padding" -padding 0
+    midplane aligned.nii.gz msp.nii.gz
+    cp msp.nii.gz $msp
+fi
+
+if [[ $debug ]]
+then
+    cd -
+    cp -a $td .
+fi
 
 exit 0
