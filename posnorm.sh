@@ -101,7 +101,7 @@ calculate-element-wise $img -mask $mask 0 -pad 0 -o masked.nii.gz
 center masked.nii.gz prepped.nii.gz center1.dof.gz
 
 # Subsample
-resample-image prepped.nii.gz resampled.nii.gz -size 3 3 3 -interp "Fast cubic bspline with padding" -padding 0
+resample-image prepped.nii.gz resampled.nii.gz -size 2 2 2 -interp "Fast cubic bspline with padding" -padding 0
 smooth-image resampled.nii.gz blurred.nii.gz 3
 
 # Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
