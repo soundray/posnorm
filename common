@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export PATH=/work/rahec/software/mirtk/build-gcc/lib/tools:$PATH
+export LD_LIBRARY_PATH=/work/rahec/software/mirtk/build-gcc/lib:$LD_LIBRARY_PATH
+
 msg () {
     for msgline
     do echo "$pn: $msgline" >&2
