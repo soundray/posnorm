@@ -104,11 +104,6 @@ cp $cdir/init-scale.dof.gz .
 register MNI152_T1_1mm.nii.gz masked.nii.gz -model Affine -dofin init-scale.dof.gz -par "Final level" 1 -dofout pre-affine.dof.gz >pre.log
 convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
 
-## exp-1
-cp pre.dof.gz $outdof
-
-exit 0
-
 transform-image masked.nii.gz prepped1.nii.gz -target MNI152_T1_1mm.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz 
 
@@ -147,3 +142,9 @@ exit 0
 ## Todo: accuracy
 ## efficiency
 ## 
+
+## exp-1
+## cp pre.dof.gz $outdof
+
+## exp-2
+## Regular (previous commit)
