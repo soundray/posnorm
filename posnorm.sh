@@ -9,6 +9,7 @@ usage () {
     normalizes the head/brain position and maximizes symmetry across MSP. 
     
 
+    [-cog] Normalization without reference (no \"nodding\" (rx) correction)
     [-ref reference.nii.gz] Standard space reference (e.g. MNI152)
     [-mni] Indicates that reference space is MNI152
     [-mask mask.nii.gz] Identify a region of interest 
@@ -24,7 +25,7 @@ center () {
     out=$1 ; shift
     dofout=$1 ; shift
     
-    read xdim ydim zdim <<< $(info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
+    read xdim ydim zdim <<< $($info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
 
     gridi=$[$xdim/2]
     gridj=$[$ydim/2]
@@ -39,7 +40,7 @@ center () {
 
     init-dof $dofout -rigid -tx $tri -ty $trj -tz $trk
 
-    transformation $f $out -dofin $dofout
+    transform-image $f $out -dofin $dofout -interp "Fast cubic bspline with padding"
 }
 
 
@@ -70,7 +71,8 @@ td=$(tempdir)
 #trap 'cp -a $td $cdir' 0 1 2 3 13 15
 trap 'rm -r $td' 0 1 2 3 13 15
 
-which help-rst >/dev/null || fatal "MIRTK not on $PATH"
+mirtkdir=$(which help-rst) || fatal "MIRTK not on $PATH"
+info=$(dirname $mirtkdir)/info
 which seg_maths >/dev/null || fatal "Nifty Seg not on $PATH"
 
 [[ $# -eq 0 ]] && fatal "Parameter error" 
@@ -92,6 +94,7 @@ do
         -dof)            outdof=$(normalpath "$2"); shift;;
         -msp)               msp=$(normalpath "$2"); shift;;
         -aligned)       aligned=$(normalpath "$2"); shift;;
+        -cog)               cog=1 ;;
         -mni)               mni=1 ;;
         -debug)           debug=1 ;;
         --) shift; break;;
@@ -125,6 +128,8 @@ if [[ ! -z $mask ]]
 then
     [[ -e $mask ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask $mask 0 -pad 0 -o masked.nii.gz
+else
+    cp image.nii.gz masked.nii.gz
 fi
 
 if [[ ! -z $ref ]] 
@@ -139,8 +144,9 @@ then
     fi
     register ref.nii.gz masked.nii.gz -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
-    transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
+    transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
 else
+    [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     center masked.nii.gz prepped2.nii.gz pre.dof.gz
     transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
@@ -149,22 +155,23 @@ seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz
 
 # Subsample
 resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
+smooth-image resampled.nii.gz blurred.nii.gz 3
 
 # Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
-#flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
+flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
 #flipreg prepped.nii.gz mspalign.dof.gz > flipreg.log
-flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
+#flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz $outdof
 
 if [[ ! -z $msp ]] ; then
-    transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast linear with padding"
+    transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     midplane aligned.nii.gz msp.nii.gz
     cp msp.nii.gz $msp
 fi
 
 if [[ ! -z $aligned ]] ; then
-    test -e aligned.nii.gz || transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast linear with padding"
+    test -e aligned.nii.gz || transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     cp aligned.nii.gz $aligned
 fi
 
@@ -176,5 +183,4 @@ fi
 
 exit 0
 
-## Note: when transforming, part of an image can be rotated/shifted out of the grid. Hence -target MNI.
 
