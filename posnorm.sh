@@ -47,7 +47,7 @@ flipreg () {
     input=$1 ; shift
     output=$1 ; shift
     reflect-image $input reflected.nii.gz -x
-    register reflected.nii.gz $input -model Rigid -bg 0 -par "Final level" 1 -dofout rreg-input-reflected.dof.gz 
+    register reflected.nii.gz $input -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-input-reflected.dof.gz 
     bisect-dof rreg-input-reflected.dof.gz $output
 }
 
@@ -137,7 +137,7 @@ then
     else
 	cp $cdir/neutral.dof.gz prepre.dof.gz
     fi
-    register ref.nii.gz masked.nii.gz -model Affine -dofin prepre.dof.gz -par "Final level" 1 -dofout pre-affine.dof.gz >pre.log
+    register ref.nii.gz masked.nii.gz -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 else
