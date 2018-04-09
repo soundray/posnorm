@@ -130,7 +130,7 @@ if [[ ! -z $ref ]]
 then
     [[ -e $ref ]] || fatal "Reference image file does not exist"
     cp $ref ref.nii.gz
-    if [[ $mni ]] 
+    if [[ $mni -eq 1 ]] 
     then
 	cp $cdir/init-scale.dof.gz prepre.dof.gz
     else
@@ -167,7 +167,7 @@ if [[ ! -z $aligned ]] ; then
     cp aligned.nii.gz $aligned
 fi
 
-if [[ $debug ]]
+if [[ $debug -eq 1 ]]
 then
     cd $launchdir
     cp -a $td .
