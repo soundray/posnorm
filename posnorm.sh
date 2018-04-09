@@ -5,8 +5,9 @@ usage () {
 
     Usage: $pn -img 3d-image.nii.gz -dof output.dof.gz [options]
 
-    Calculates a rigid transformation that normalizes the head/brain position and
-    maximizes image symmetry
+    Approximates the mid-sagittal plane (MSP), calculates a rigid transformation that 
+    normalizes the head/brain position and maximizes symmetry across MSP. 
+    
 
     [-ref reference.nii.gz] Standard space reference (e.g. MNI152)
     [-mni] Indicates that reference space is MNI152
