@@ -15,7 +15,7 @@ export PATH=~/software/mirtk/build/lib/tools:$PATH
 usage () {
     msg "
 
-    Usage: $pn -img 3d-image.nii.gz -mask mask.nii.gz -dof output.dof.gz [-msp mid-sagittal-plane.nii.gz]
+    Usage: $pn -img 3d-image.nii.gz -dof output.dof.gz [-mask mask.nii.gz] [-msp mid-sagittal-plane.nii.gz] [-aligned aligned-3d.nii.gz]
     
     "
 }
@@ -97,7 +97,10 @@ test -e $img || fatal "posnorm input file does not exist"
 cd $td
 
 cp $img image.nii.gz
-calculate-element-wise image.nii.gz -mask $mask 0 -pad 0 -o masked.nii.gz
+if [[ ! -z $mask ]]
+    [[ -e $mask ]] || fatal "Mask image file does not exist"
+    calculate-element-wise image.nii.gz -mask $mask 0 -pad 0 -o masked.nii.gz
+fi
 
 cp $cdir/MNI152_T1_1mm.nii.gz .
 cp $cdir/init-scale.dof.gz .
@@ -108,13 +111,13 @@ transform-image masked.nii.gz prepped1.nii.gz -target MNI152_T1_1mm.nii.gz -dofi
 seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz 
 
 # Subsample
-#resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
+resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
 #smooth-image resampled.nii.gz blurred.nii.gz 3
 
 # Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
 #flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
-flipreg prepped.nii.gz mspalign.dof.gz > flipreg.log
-#flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
+#flipreg prepped.nii.gz mspalign.dof.gz > flipreg.log
+flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz $outdof
 
