@@ -9,7 +9,7 @@ usage () {
     normalizes the head/brain position and maximizes symmetry across MSP. 
     
 
-    [-cog] Normalization without reference (no \"nodding\" (rx) correction)
+    [-cog] Normalization without reference (faster; no \"nodding\" (rx) correction)
     [-ref reference.nii.gz] Standard space reference (e.g. MNI152)
     [-mni] Indicates that reference space is MNI152
     [-mask mask.nii.gz] Identify a region of interest 
