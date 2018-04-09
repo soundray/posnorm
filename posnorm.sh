@@ -120,15 +120,18 @@ cd $td
 
 cp $img image.nii.gz
 
-if [[ ! -z $mask ]] ; then
+if [[ ! -z $mask ]] 
+then
     [[ -e $mask ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask $mask 0 -pad 0 -o masked.nii.gz
 fi
 
-if [[ ! -z $ref ]] ; then
+if [[ ! -z $ref ]] 
+then
     [[ -e $ref ]] || fatal "Reference image file does not exist"
     cp $ref ref.nii.gz
-    if $mni ; then
+    if [[ $mni ]] 
+    then
 	cp $cdir/init-scale.dof.gz prepre.dof.gz
     else
 	cp $cdir/neutral.dof.gz prepre.dof.gz
