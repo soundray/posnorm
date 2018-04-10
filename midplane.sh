@@ -3,8 +3,12 @@
 usage () {
     msg "
 
-    Usage: $pn -img 3d-image.nii.gz -dofin mspalign.dof.gz -out mid-sagittal-plane.nii.gz]
-    
+    Usage: $pn -img 3d-image.nii.gz [-dofin mspalign.dof.gz] [-out mid-sagittal-plane.nii.gz]
+
+    Extracts the grid centre plane as a 3D image with xdim = 1 after applying the
+    transformation optionally given via -dofin. Writes to \$PWD/centerplane.nii.gz 
+    if -out not provided.
+        
     "
 }
 
@@ -26,7 +30,7 @@ which help-rst >/dev/null || fatal "MIRTK not on $PATH"
     
 img=
 dof=
-msp=$PWD/midsagittal.nii.gz
+msp=$PWD/centerplane.nii.gz
 debug=0
 label=
 while [[ $# -gt 0 ]]
@@ -45,7 +49,8 @@ do
     shift
 done
 
-[[ -e $img ]] || fatal "Input file does not exist"
+[[ -z $img ]] && fatal "Input image not provided (use -img)"
+[[ -e $img ]] || fatal "Input image file does not exist"
 [[ -z $dof ]] && dof=$cdir/neutral.dof.gz
 
 cd $td
