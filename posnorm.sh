@@ -138,7 +138,7 @@ then
     cp $ref ref.nii.gz
     if [[ $mni -eq 1 ]] 
     then
-	cp $cdir/init-scale.dof.gz prepre.dof.gz
+	cp $cdir/mni-init-scale.dof.gz prepre.dof.gz
     else
 	cp $cdir/neutral.dof.gz prepre.dof.gz
     fi
