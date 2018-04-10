@@ -26,7 +26,7 @@ which help-rst >/dev/null || fatal "MIRTK not on $PATH"
     
 img=
 dof=
-msp=
+msp=$PWD/midsagittal.nii.gz
 debug=0
 label=
 while [[ $# -gt 0 ]]
@@ -45,7 +45,8 @@ do
     shift
 done
 
-test -e $img || fatal "Input file does not exist"
+[[ -e $img ]] || fatal "Input file does not exist"
+[[ -z $dof ]] && dof=$cdir/neutral.dof.gz
 
 cd $td
 
