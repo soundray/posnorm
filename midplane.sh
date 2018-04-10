@@ -23,6 +23,7 @@ td=$(tempdir)
 trap 'rm -r $td' 0 1 2 3 13 15
 
 which help-rst >/dev/null || fatal "MIRTK not on $PATH"
+which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
 
 . $cdir/midplane-function.sh
 

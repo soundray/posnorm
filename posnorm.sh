@@ -73,7 +73,7 @@ trap 'rm -r $td' 0 1 2 3 13 15
 
 mirtkdir=$(which help-rst) || fatal "MIRTK not on $PATH"
 info=$(dirname $mirtkdir)/info
-which seg_maths >/dev/null || fatal "Nifty Seg not on $PATH"
+which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
 
 [[ $# -eq 0 ]] && fatal "Parameter error" 
 
