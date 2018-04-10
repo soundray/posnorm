@@ -142,7 +142,7 @@ then
     else
 	cp $cdir/neutral.dof.gz prepre.dof.gz
     fi
-    register ref.nii.gz masked.nii.gz -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log
+    register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
 else
@@ -175,11 +175,10 @@ if [[ ! -z $aligned ]] ; then
     cp aligned.nii.gz $aligned
 fi
 
-if [[ $debug -eq 1 ]]
-then
-    cd $launchdir
-    cp -a $td .
-fi
+[[ $debug -eq 1 ]] || exit 0
+
+cd $launchdir
+cp -a $td .
 
 exit 0
 
