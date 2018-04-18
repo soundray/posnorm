@@ -12,15 +12,15 @@ usage () {
     "
 }
 
-cdir=$(dirname $0)
+cdir=$(dirname "$0")
 . $cdir/common
 cdir=$(normalpath $cdir)
 
-pn=$(basename $0)
+pn=$(basename "$0")
 
 td=$(tempdir)
 #trap 'cp -a $td $cdir' 0 1 2 3 13 15
-trap 'rm -r $td' 0 1 2 3 13 15
+trap 'rm -r "$td"' 0 1 2 3 13 15
 
 which help-rst >/dev/null || fatal "MIRTK not on $PATH"
 which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
@@ -31,7 +31,7 @@ which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
     
 img=
 dof=
-msp=$PWD/centerplane.nii.gz
+msp="$PWD"/centerplane.nii.gz
 debug=0
 label=
 while [[ $# -gt 0 ]]
@@ -50,18 +50,20 @@ do
     shift
 done
 
-[[ -z $img ]] && fatal "Input image not provided (use -img)"
-[[ -e $img ]] || fatal "Input image file does not exist"
-[[ -z $dof ]] && dof=$cdir/neutral.dof.gz
+[[ -z "$img" ]] && fatal "Input image not provided (use -img)"
+[[ -e "$img" ]] || fatal "Input image file does not exist"
+[[ -z "$dof" ]] && dof=$cdir/neutral.dof.gz
 
-cd $td
+launchdir="$PWD"
+cd "$td"
 
-transform-image $img aligned.nii.gz $label -dofin $dof -interp "Fast cubic bspline with padding"
+transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding"
 midplane aligned.nii.gz msp.nii.gz
-cp msp.nii.gz $msp
+cp msp.nii.gz "$msp"
 
 [[ $debug -eq 1 ]] || exit 0
 
-cd -
-cp -a $td .
+cp -a "$td" "$launchdir"/
+cd "$launchdir"
+ 
 exit 0
