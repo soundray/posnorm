@@ -71,9 +71,9 @@ td=$(tempdir)
 #trap 'cp -a $td $cdir' 0 1 2 3 13 15
 trap 'rm -r $td' 0 1 2 3 13 15
 
-mirtkdir=$(which help-rst) || fatal "MIRTK not on $PATH"
+mirtkdir=$(which help-rst >/dev/null 2>&1) || fatal "MIRTK not on PATH"
 info=$(dirname $mirtkdir)/info
-which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
+which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
 [[ $# -eq 0 ]] && fatal "Parameter error" 
 
