@@ -75,7 +75,7 @@ mirtkhelp=$(which help-rst >/dev/null 2>&1) || fatal "MIRTK not on PATH"
 info=$(dirname $mirtkhelp)/info
 which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
-[[ $# -eq 0 ]] && fatal "Parameter error" 
+[[ $# -gt 0 ]] || fatal "Parameter error" 
 
 img=
 mask=
@@ -116,7 +116,7 @@ then
     fi
 fi
 
-[[ -z $img ]] && fatal "Input image is needed"
+[[ -n $img ]] || fatal "Input image is needed"
 [[ -e $img ]] || fatal "posnorm input file does not exist"
 
 launchdir=$PWD
