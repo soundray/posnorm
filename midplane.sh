@@ -30,7 +30,7 @@ which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
     
 img=
 dof=
-msp=$PWD/centerplane.nii.gz
+msp="$PWD"/centerplane.nii.gz
 debug=0
 label=
 while [[ $# -gt 0 ]]
@@ -53,7 +53,7 @@ done
 [[ -e $img ]] || fatal "Input image file does not exist"
 [[ -z $dof ]] && dof=$cdir/neutral.dof.gz
 
-launchdir=$PWD
+launchdir="$PWD"
 cd $td
 
 transform-image $img aligned.nii.gz $label -dofin $dof -interp "Fast cubic bspline with padding"
