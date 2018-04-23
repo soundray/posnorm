@@ -3,7 +3,7 @@
 usage () {
     msg "
 
-    Usage: $pn -img 3d-image.nii.gz -dof output.dof.gz [options]
+    Usage: $pn -img 3d-image.nii.gz -dofout output.dof.gz [options]
 
     Approximates the mid-sagittal plane (MSP), calculates a rigid transformation that 
     normalizes the head/brain position and maximizes symmetry across MSP. 
