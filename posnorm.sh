@@ -21,9 +21,9 @@ usage () {
 }
 
 center () {
-    f=$1 ; shift
-    out=$1 ; shift
-    dofout=$1 ; shift
+    f="$1" ; shift
+    out="$1" ; shift
+    dofout="$1" ; shift
     
     read xdim ydim zdim <<< $($info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
 
@@ -32,39 +32,39 @@ center () {
     gridk=$[$zdim/2]
     gridl=1
 
-    read cogi cogj cogk <<< $(seg_stats $f -c | cut -d ' ' -f 1-3)
+    read cogi cogj cogk <<< $(seg_stats "$f" -c | cut -d ' ' -f 1-3)
 
     tri=$(echo $gridi - $cogi | $cdir/wrap.bc )
     trj=$(echo $gridj - $cogj | $cdir/wrap.bc )
     trk=$(echo $gridk - $cogk | $cdir/wrap.bc )
 
-    init-dof $dofout -rigid -tx $tri -ty $trj -tz $trk
+    init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
 
-    transform-image $f $out -dofin $dofout -interp "Fast cubic bspline with padding"
+    transform-image "$f" "$out" -dofin "$dofout" -interp "Fast cubic bspline with padding"
 }
 
 
 flipreg () {
-    input=$1 ; shift
-    output=$1 ; shift
-    reflect-image $input reflected.nii.gz -x
-    register reflected.nii.gz $input -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-input-reflected.dof.gz 
-    bisect-dof rreg-input-reflected.dof.gz $output
+    input="$1" ; shift
+    output="$1" ; shift
+    reflect-image "$input" reflected.nii.gz -x
+    register reflected.nii.gz "$input" -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-input-reflected.dof.gz 
+    bisect-dof rreg-input-reflected.dof.gz "$output"
 }
 
-cdir=$(dirname $0)
-. $cdir/common
-cdir=$(normalpath $cdir)
+cdir=$(dirname "$0")
+. "$cdir"/common
+cdir=$(normalpath "$cdir")
 
-. $cdir/midplane-function.sh
+. "$cdir"/midplane-function.sh
 
-pn=$(basename $0)
+pn=$(basename "$0")
 
 td=$(tempdir)
 trap finish EXIT
 
 mirtkhelp=$(which help-rst 2>&1) || fatal "MIRTK not on PATH"
-info=$(dirname $mirtkhelp)/info
+info=$(dirname "$mirtkhelp")/info
 which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
 [[ $# -gt 0 ]] || fatal "Parameter error" 
@@ -100,43 +100,43 @@ if [[ $# -gt 0 ]]
 then
     if [[ $# -eq 3 ]] ## old-style invocation 
     then
-	img=$(normalpath $1) ; shift
-	mask=$(normalpath $1) ; shift
-	outdof=$(normalpath $1) ; shift
+	img=$(normalpath "$1") ; shift
+	mask=$(normalpath "$1") ; shift
+	outdof=$(normalpath "$1") ; shift
     else
 	fatal "Parameter error" 
     fi
 fi
 
-[[ -n $img ]] || fatal "Input image is needed"
-[[ -e $img ]] || fatal "posnorm input file does not exist"
+[[ -n "$img" ]] || fatal "Input image is needed"
+[[ -e "$img" ]] || fatal "posnorm input file does not exist"
 
 launchdir="$PWD"
 cd $td
 
-cp $img image.nii.gz
+cp "$img" image.nii.gz
 
-if [[ -z $mask ]] 
+if [[ -z "$mask" ]] 
 then
     cp image.nii.gz masked.nii.gz
 else
-    [[ -e $mask ]] || fatal "Mask image file does not exist"
-    calculate-element-wise image.nii.gz -mask $mask 0 -pad 0 -o masked.nii.gz
+    [[ -e "$mask" ]] || fatal "Mask image file does not exist"
+    calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
 fi
 
-if [[ -z $ref ]] 
+if [[ -z "$ref" ]] 
 then
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     center masked.nii.gz prepped2.nii.gz pre.dof.gz
     transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 else
-    [[ -e $ref ]] || fatal "Reference image file does not exist"
-    cp $ref ref.nii.gz
+    [[ -e "$ref" ]] || fatal "Reference image file does not exist"
+    cp "$ref" ref.nii.gz
     if [[ $mni -eq 1 ]] 
     then
-	cp $cdir/mni-init-scale.dof.gz prepre.dof.gz
+	cp "$cdir"/mni-init-scale.dof.gz prepre.dof.gz
     else
-	cp $cdir/neutral.dof.gz prepre.dof.gz
+	cp "$cdir"/neutral.dof.gz prepre.dof.gz
     fi
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
@@ -154,17 +154,17 @@ flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
 #flipreg prepped.nii.gz mspalign.dof.gz > flipreg.log
 #flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
 
-compose-dofs pre.dof.gz mspalign.dof.gz $outdof
+compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
 
-if [[ ! -z $msp ]] ; then
-    transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
+if [[ ! -z "$msp" ]] ; then
+    transform-image "$img" aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     midplane aligned.nii.gz msp.nii.gz
-    cp msp.nii.gz $msp
+    cp msp.nii.gz "$msp"
 fi
 
-if [[ ! -z $aligned ]] ; then
-    test -e aligned.nii.gz || transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
-    cp aligned.nii.gz $aligned
+if [[ ! -z "$aligned" ]] ; then
+    test -e aligned.nii.gz || transform-image "$img" aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
+    cp aligned.nii.gz "$aligned"
 fi
 
 exit 0
