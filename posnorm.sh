@@ -111,7 +111,7 @@ fi
 [[ -n $img ]] || fatal "Input image is needed"
 [[ -e $img ]] || fatal "posnorm input file does not exist"
 
-launchdir=$PWD
+launchdir="$PWD"
 cd $td
 
 cp $img image.nii.gz
