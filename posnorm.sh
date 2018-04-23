@@ -68,8 +68,7 @@ cdir=$(normalpath $cdir)
 pn=$(basename $0)
 
 td=$(tempdir)
-#trap 'cp -a $td $cdir' 0 1 2 3 13 15
-trap 'rm -r $td' 0 1 2 3 13 15
+trap finish EXIT
 
 mirtkhelp=$(which help-rst >/dev/null 2>&1) || fatal "MIRTK not on PATH"
 info=$(dirname $mirtkhelp)/info
@@ -174,11 +173,6 @@ if [[ ! -z $aligned ]] ; then
     test -e aligned.nii.gz || transform-image $img aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     cp aligned.nii.gz $aligned
 fi
-
-[[ $debug -eq 1 ]] || exit 0
-
-cd $launchdir
-cp -a $td .
 
 exit 0
 

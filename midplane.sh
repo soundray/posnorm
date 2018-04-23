@@ -19,8 +19,7 @@ cdir=$(normalpath $cdir)
 pn=$(basename $0)
 
 td=$(tempdir)
-#trap 'cp -a $td $cdir' 0 1 2 3 13 15
-trap 'rm -r $td' 0 1 2 3 13 15
+trap finish EXIT
 
 which help-rst >/dev/null || fatal "MIRTK not on $PATH"
 which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
@@ -54,14 +53,11 @@ done
 [[ -e $img ]] || fatal "Input image file does not exist"
 [[ -z $dof ]] && dof=$cdir/neutral.dof.gz
 
+launchdir=$PWD
 cd $td
 
 transform-image $img aligned.nii.gz $label -dofin $dof -interp "Fast cubic bspline with padding"
 midplane aligned.nii.gz msp.nii.gz
 cp msp.nii.gz $msp
 
-[[ $debug -eq 1 ]] || exit 0
-
-cd -
-cp -a $td .
 exit 0
