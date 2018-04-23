@@ -9,9 +9,9 @@ msg () {
 fatal () { msg "$@" ; usage ; exit 1 ; }
 
 finish () {
-    [[ $debug -eq 1 ]] && cp -a $td $launchdir/
+    [[ $debug -eq 1 ]] && cp -a $td "$launchdir"/
     rm -r $td
-    cd $launchdir
+    cd "$launchdir"
     exit
 }
 
