@@ -1,5 +1,5 @@
 #!/bin/bash
-set -vx
+
 usage () {
     msg "
 
@@ -83,7 +83,7 @@ do
         -img)               img=$(normalpath "$2"); shift;;
         -mask)             mask=$(normalpath "$2"); shift;;
         -ref)               ref=$(normalpath "$2"); shift;;
-        -dof)            outdof=$(normalpath "$2"); shift;;
+        -dofout)         outdof=$(normalpath "$2"); shift;;
         -msp)               msp=$(normalpath "$2"); shift;;
         -aligned)       aligned=$(normalpath "$2"); shift;;
         -cog)               cog=1 ;;
@@ -168,5 +168,3 @@ if [[ ! -z $aligned ]] ; then
 fi
 
 exit 0
-
-
