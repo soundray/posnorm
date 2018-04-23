@@ -24,12 +24,12 @@ tempdir () {
 }
 
 normalpath () {
+    set -vx
     local s="$1"
     [[ ${#s} -lt 800 ]] || fatal "Option path too long"
-    [[ $s =~ ^[[:print:]]*$ ]] || fatal "Non-printables in path"
-    [[ $s =~ ^-*$ ]] || fatal "Parameter error. Check for missing filename"
-    dir=$(dirname "$1")
-    bas=$(basename "$1")
+    [[ "$s" =~ ^[[:print:]]*$ ]] || fatal "Non-printables in path"
+    dir=$(dirname -- "$1")
+    bas=$(basename -- "$1")
     echo $(cd $dir && pwd)/$bas
 }
 
