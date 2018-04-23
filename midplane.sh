@@ -49,7 +49,7 @@ do
     shift
 done
 
-[[ -z "$img" ]] && fatal "Input image not provided (use -img)"
+[[ -n "$img" ]] || fatal "Input image not provided (use -img)"
 [[ -e "$img" ]] || fatal "Input image file does not exist"
 [[ -z "$dof" ]] && dof=$cdir/neutral.dof.gz
 
