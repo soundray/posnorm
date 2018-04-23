@@ -12,11 +12,11 @@ usage () {
     "
 }
 
-cdir=$(dirname $0)
-. $cdir/common
-cdir=$(normalpath $cdir)
+cdir=$(dirname "$0")
+. "$cdir"/common
+cdir=$(normalpath "$cdir")
 
-pn=$(basename $0)
+pn=$(basename "$0")
 
 td=$(tempdir)
 trap finish EXIT
@@ -49,15 +49,15 @@ do
     shift
 done
 
-[[ -z $img ]] && fatal "Input image not provided (use -img)"
-[[ -e $img ]] || fatal "Input image file does not exist"
-[[ -z $dof ]] && dof=$cdir/neutral.dof.gz
+[[ -z "$img" ]] && fatal "Input image not provided (use -img)"
+[[ -e "$img" ]] || fatal "Input image file does not exist"
+[[ -z "$dof" ]] && dof=$cdir/neutral.dof.gz
 
 launchdir="$PWD"
 cd $td
 
-transform-image $img aligned.nii.gz $label -dofin $dof -interp "Fast cubic bspline with padding"
+transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding"
 midplane aligned.nii.gz msp.nii.gz
-cp msp.nii.gz $msp
+cp msp.nii.gz "$msp"
 
 exit 0
