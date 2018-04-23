@@ -2,9 +2,12 @@
 Positional normalization and mid-sagittal plane identification for 3D images with bilateral (biological) symmetry
 
 Depends on:
-MIRTK (https://github.com/BioMedIA/MIRTK)
-NiftySeg (http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg).
-bc - GNU bc arbitrary precision calculator language
+
+* MIRTK (https://github.com/BioMedIA/MIRTK)
+
+* NiftySeg (http://cmictig.cs.ucl.ac.uk/wiki/index.php/NiftySeg).
+
+* bc - GNU bc arbitrary precision calculator language
 
 posnorm.sh:
 ----
