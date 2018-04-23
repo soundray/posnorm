@@ -72,7 +72,7 @@ which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 img=
 mask=
 ref=
-outdof=$PWD/outputDOF.dof.gz
+outdof="$PWD"/outputDOF.dof.gz
 msp=
 aligned=
 mni=0
