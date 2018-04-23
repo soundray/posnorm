@@ -52,11 +52,11 @@ flipreg () {
     bisect-dof rreg-input-reflected.dof.gz $output
 }
 
-. $cdir/midplane-function.sh
-
 cdir=$(dirname $0)
 . $cdir/common
 cdir=$(normalpath $cdir)
+
+. $cdir/midplane-function.sh
 
 pn=$(basename $0)
 
