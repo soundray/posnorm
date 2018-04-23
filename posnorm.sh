@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -vx
 usage () {
     msg "
 
@@ -63,7 +63,7 @@ pn=$(basename $0)
 td=$(tempdir)
 trap finish EXIT
 
-mirtkhelp=$(which help-rst >/dev/null 2>&1) || fatal "MIRTK not on PATH"
+mirtkhelp=$(which help-rst 2>&1) || fatal "MIRTK not on PATH"
 info=$(dirname $mirtkhelp)/info
 which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 

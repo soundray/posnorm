@@ -12,6 +12,7 @@ finish () {
     [[ $debug -eq 1 ]] && cp -a $td $launchdir/
     rm -r $td
     cd $launchdir
+    exit
 }
 
 tempdir () {
