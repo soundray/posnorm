@@ -3,11 +3,17 @@
 usage () {
     msg "
 
-    Usage: $pn -img 3d-image.nii.gz [-dofin mspalign.dof.gz] [-out mid-sagittal-plane.nii.gz]
+    Usage: $pn -img 3d-image.nii.gz
 
     Extracts the grid centre plane as a 3D image with xdim = 1 after applying the
     transformation optionally given via -dofin. Writes to \$PWD/centerplane.nii.gz 
     if -out not provided.
+
+    Options:
+
+    [-dofin mspalign.dof.gz] Transformation to apply before centre plane extraction
+    [-out mid-sagittal-plane.nii.gz] Output file to receive centre plane
+    [-ref reference.nii.gz] Image to use as geometry template for output
         
     "
 }
