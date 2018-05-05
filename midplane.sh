@@ -57,9 +57,9 @@ done
 launchdir="$PWD"
 cd $td
 
-target=''
-[[ -n $ref ]] && target="-target $ref" 
-transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding" $target
+target=
+[[ -n "$ref" ]] && target="-target $ref" 
+transform-image "$img" aligned.nii.gz $label $target -dofin "$dof" -interp "Fast cubic bspline with padding"
 midplane aligned.nii.gz msp.nii.gz
 cp msp.nii.gz "$msp"
 

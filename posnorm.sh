@@ -157,7 +157,9 @@ flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
 
 if [[ ! -z "$msp" ]] ; then
-    transform-image "$img" aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
+    target=
+    [[ -n $ref ]] || target="-target $ref"
+    transform-image "$img" aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     midplane aligned.nii.gz msp.nii.gz
     cp msp.nii.gz "$msp"
 fi
