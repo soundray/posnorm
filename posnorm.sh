@@ -52,42 +52,19 @@ flipreg () {
     bisect-dof rreg-input-reflected.dof.gz "$output"
 }
 
-<<<<<<< HEAD
-midplane () {
-    ltr="$1" ; shift
-    lout="$1" ; shift
-    seg_maths "$ltr" -add 1 tr.nii.gz
-    read minx maxx miny maxy minz maxz <<< $(seg_stats tr.nii.gz -B)
-    n=$[$maxx/2]
-    extract-image-region "$ltr" "$lout" -Rx1 $n -Rx2 $n -Ry1 $miny -Ry2 $maxy -Rz1 $minz -Rz2 $maxz # -Rt1 $mint -Rt2 $maxt
-}
-
-cdir=$(dirname "$0")
-. $cdir/common
-cdir=$(normalpath "$cdir")
-=======
 cdir=$(dirname "$0")
 . "$cdir"/common
 cdir=$(normalpath "$cdir")
 
 . "$cdir"/midplane-function.sh
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 
 pn=$(basename "$0")
 
 td=$(tempdir)
-<<<<<<< HEAD
-#trap 'cp -a $td $cdir' 0 1 2 3 13 15
-trap 'rm -r "$td"' 0 1 2 3 13 15
-
-mirtkdir=$(which help-rst 2>/dev/null) || fatal "MIRTK not on PATH"
-info=$(dirname "$mirtkdir")/info
-=======
 trap finish EXIT
 
 mirtkhelp=$(which help-rst 2>&1) || fatal "MIRTK not on PATH"
 info=$(dirname "$mirtkhelp")/info
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
 [[ $# -gt 0 ]] || fatal "Parameter error" 
@@ -131,21 +108,6 @@ then
     fi
 fi
 
-<<<<<<< HEAD
-[[ -z "$img" ]] && fatal "Input image is needed"
-[[ -e "$img" ]] || fatal "posnorm input file does not exist"
-
-launchdir="$PWD"
-cd "$td"
-
-cp "$img" image.nii.gz
-
-if [[ ! -z "$mask" ]] 
-then
-    [[ -e "$mask" ]] || fatal "Mask image file does not exist"
-    calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
-else
-=======
 [[ -n "$img" ]] || fatal "Input image is needed"
 [[ -e "$img" ]] || fatal "posnorm input file does not exist"
 
@@ -156,24 +118,18 @@ cp "$img" image.nii.gz
 
 if [[ -z "$mask" ]] 
 then
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
     cp image.nii.gz masked.nii.gz
 else
     [[ -e "$mask" ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
 fi
 
-<<<<<<< HEAD
-if [[ ! -z "$ref" ]] 
-then
-=======
 if [[ -z "$ref" ]] 
 then
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     center masked.nii.gz prepped2.nii.gz pre.dof.gz
     transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 else
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
     [[ -e "$ref" ]] || fatal "Reference image file does not exist"
     cp "$ref" ref.nii.gz
     if [[ $mni -eq 1 ]] 
@@ -211,12 +167,4 @@ if [[ ! -z "$aligned" ]] ; then
     cp aligned.nii.gz "$aligned"
 fi
 
-<<<<<<< HEAD
-[[ $debug -eq 1 ]] || exit 0
-
-cd "$launchdir"
-cp -a "$td" .
-
-=======
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 exit 0

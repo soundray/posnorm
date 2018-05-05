@@ -18,8 +18,6 @@ cdir=$(normalpath "$cdir")
 
 pn=$(basename "$0")
 
-pn=$(basename "$0")
-
 td=$(tempdir)
 trap finish EXIT
 
@@ -41,6 +39,7 @@ do
         -img)               img=$(normalpath "$2"); shift;;
         -dofin)             dof=$(normalpath "$2"); shift;;
         -out)               msp=$(normalpath "$2"); shift;;
+	-ref)               ref=$(normalpath "$2"); shift;;
         -debug)           debug=1 ;;
 	-label)           label="-labels" ;;
         --) shift; break;;
@@ -58,16 +57,10 @@ done
 launchdir="$PWD"
 cd $td
 
-transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding"
+target=''
+[[ -n $ref ]] && target="-target $ref" 
+transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding" $target
 midplane aligned.nii.gz msp.nii.gz
 cp msp.nii.gz "$msp"
 
-<<<<<<< HEAD
-[[ $debug -eq 1 ]] || exit 0
-
-cp -a "$td" "$launchdir"/
-cd "$launchdir"
- 
-=======
->>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 exit 0
