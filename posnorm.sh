@@ -116,20 +116,16 @@ cd $td
 
 cp "$img" image.nii.gz
 
-if [[ -z "$mask" ]] 
+if [[ -n "$mask" ]] 
 then
-    cp image.nii.gz masked.nii.gz
-else
     [[ -e "$mask" ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
+else
+    cp image.nii.gz masked.nii.gz
 fi
 
-if [[ -z "$ref" ]] 
+if [[ -n "$ref" ]] 
 then
-    [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
-    center masked.nii.gz prepped2.nii.gz pre.dof.gz
-    transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
-else
     [[ -e "$ref" ]] || fatal "Reference image file does not exist"
     cp "$ref" ref.nii.gz
     if [[ $mni -eq 1 ]] 
@@ -141,6 +137,10 @@ else
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
+else
+    [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
+    center masked.nii.gz prepped2.nii.gz pre.dof.gz
+    transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
 
 seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz 
@@ -156,7 +156,7 @@ flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
 
-if [[ ! -z "$msp" ]] ; then
+if [[ -n "$msp" ]] ; then
     target=
     [[ -n $ref ]] || target="-target $ref"
     transform-image "$img" aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
@@ -164,7 +164,7 @@ if [[ ! -z "$msp" ]] ; then
     cp msp.nii.gz "$msp"
 fi
 
-if [[ ! -z "$aligned" ]] ; then
+if [[ -n "$aligned" ]] ; then
     test -e aligned.nii.gz || transform-image "$img" aligned.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline with padding"
     cp aligned.nii.gz "$aligned"
 fi
