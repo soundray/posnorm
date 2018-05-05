@@ -13,14 +13,15 @@ usage () {
 }
 
 cdir=$(dirname "$0")
-. $cdir/common
-cdir=$(normalpath $cdir)
+. "$cdir"/common
+cdir=$(normalpath "$cdir")
+
+pn=$(basename "$0")
 
 pn=$(basename "$0")
 
 td=$(tempdir)
-#trap 'cp -a $td $cdir' 0 1 2 3 13 15
-trap 'rm -r "$td"' 0 1 2 3 13 15
+trap finish EXIT
 
 which help-rst >/dev/null || fatal "MIRTK not on $PATH"
 which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
@@ -50,20 +51,23 @@ do
     shift
 done
 
-[[ -z "$img" ]] && fatal "Input image not provided (use -img)"
+[[ -n "$img" ]] || fatal "Input image not provided (use -img)"
 [[ -e "$img" ]] || fatal "Input image file does not exist"
 [[ -z "$dof" ]] && dof=$cdir/neutral.dof.gz
 
 launchdir="$PWD"
-cd "$td"
+cd $td
 
 transform-image "$img" aligned.nii.gz "$label" -dofin "$dof" -interp "Fast cubic bspline with padding"
 midplane aligned.nii.gz msp.nii.gz
 cp msp.nii.gz "$msp"
 
+<<<<<<< HEAD
 [[ $debug -eq 1 ]] || exit 0
 
 cp -a "$td" "$launchdir"/
 cd "$launchdir"
  
+=======
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 exit 0

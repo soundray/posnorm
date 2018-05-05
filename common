@@ -8,6 +8,13 @@ msg () {
 
 fatal () { msg "$@" ; usage ; exit 1 ; }
 
+finish () {
+    [[ $debug -eq 1 ]] && cp -a $td "$launchdir"/
+    rm -r $td
+    cd "$launchdir"
+    exit
+}
+
 tempdir () {
     : ${TMPDIR:="/tmp"}
     tdbase=$TMPDIR/$USER
@@ -18,10 +25,10 @@ tempdir () {
 
 normalpath () {
     local s="$1"
-    [[ $s == ${s::800} ]] || fatal "Option path too long"
-    [[ $s == ${s//[^[:print:]]/} ]] || fatal "Non-printables in path"
-    dir=$(dirname "$1")
-    bas=$(basename "$1")
+    [[ ${#s} -lt 800 ]] || fatal "Option path too long"
+    [[ "$s" =~ ^[[:print:]]*$ ]] || fatal "Non-printables in path"
+    dir=$(dirname -- "$1")
+    bas=$(basename -- "$1")
     echo $(cd $dir && pwd)/$bas
 }
 

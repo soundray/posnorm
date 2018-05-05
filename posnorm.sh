@@ -25,7 +25,7 @@ center () {
     out="$1" ; shift
     dofout="$1" ; shift
     
-    read xdim ydim zdim <<< $($info "$f" | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
+    read xdim ydim zdim <<< $($info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
 
     gridi=$[$xdim/2]
     gridj=$[$ydim/2]
@@ -34,9 +34,9 @@ center () {
 
     read cogi cogj cogk <<< $(seg_stats "$f" -c | cut -d ' ' -f 1-3)
 
-    tri=$(echo $gridi - $cogi | "$cdir"/wrap.bc )
-    trj=$(echo $gridj - $cogj | "$cdir"/wrap.bc )
-    trk=$(echo $gridk - $cogk | "$cdir"/wrap.bc )
+    tri=$(echo $gridi - $cogi | $cdir/wrap.bc )
+    trj=$(echo $gridj - $cogj | $cdir/wrap.bc )
+    trk=$(echo $gridk - $cogk | $cdir/wrap.bc )
 
     init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
 
@@ -52,6 +52,7 @@ flipreg () {
     bisect-dof rreg-input-reflected.dof.gz "$output"
 }
 
+<<<<<<< HEAD
 midplane () {
     ltr="$1" ; shift
     lout="$1" ; shift
@@ -64,18 +65,32 @@ midplane () {
 cdir=$(dirname "$0")
 . $cdir/common
 cdir=$(normalpath "$cdir")
+=======
+cdir=$(dirname "$0")
+. "$cdir"/common
+cdir=$(normalpath "$cdir")
+
+. "$cdir"/midplane-function.sh
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 
 pn=$(basename "$0")
 
 td=$(tempdir)
+<<<<<<< HEAD
 #trap 'cp -a $td $cdir' 0 1 2 3 13 15
 trap 'rm -r "$td"' 0 1 2 3 13 15
 
 mirtkdir=$(which help-rst 2>/dev/null) || fatal "MIRTK not on PATH"
 info=$(dirname "$mirtkdir")/info
+=======
+trap finish EXIT
+
+mirtkhelp=$(which help-rst 2>&1) || fatal "MIRTK not on PATH"
+info=$(dirname "$mirtkhelp")/info
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
-[[ $# -eq 0 ]] && fatal "Parameter error" 
+[[ $# -gt 0 ]] || fatal "Parameter error" 
 
 img=
 mask=
@@ -116,6 +131,7 @@ then
     fi
 fi
 
+<<<<<<< HEAD
 [[ -z "$img" ]] && fatal "Input image is needed"
 [[ -e "$img" ]] || fatal "posnorm input file does not exist"
 
@@ -129,11 +145,35 @@ then
     [[ -e "$mask" ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
 else
+=======
+[[ -n "$img" ]] || fatal "Input image is needed"
+[[ -e "$img" ]] || fatal "posnorm input file does not exist"
+
+launchdir="$PWD"
+cd $td
+
+cp "$img" image.nii.gz
+
+if [[ -z "$mask" ]] 
+then
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
     cp image.nii.gz masked.nii.gz
+else
+    [[ -e "$mask" ]] || fatal "Mask image file does not exist"
+    calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked.nii.gz
 fi
 
+<<<<<<< HEAD
 if [[ ! -z "$ref" ]] 
 then
+=======
+if [[ -z "$ref" ]] 
+then
+    [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
+    center masked.nii.gz prepped2.nii.gz pre.dof.gz
+    transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
+else
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
     [[ -e "$ref" ]] || fatal "Reference image file does not exist"
     cp "$ref" ref.nii.gz
     if [[ $mni -eq 1 ]] 
@@ -145,10 +185,6 @@ then
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
-else
-    [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
-    center masked.nii.gz prepped2.nii.gz pre.dof.gz
-    transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
 
 seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz 
@@ -175,11 +211,12 @@ if [[ ! -z "$aligned" ]] ; then
     cp aligned.nii.gz "$aligned"
 fi
 
+<<<<<<< HEAD
 [[ $debug -eq 1 ]] || exit 0
 
 cd "$launchdir"
 cp -a "$td" .
 
+=======
+>>>>>>> 455fb99291c81101f8a7c19ddd788d850e7f2b43
 exit 0
-
-
