@@ -3,7 +3,7 @@
 usage () {
     msg "
 
-    Usage: $pn -img 3d-image.nii.gz
+    Usage: $pn -img 3d-image.nii.gz [options]
 
     Extracts the grid centre plane as a 3D image with xdim = 1 after applying the
     transformation optionally given via -dofin. Writes to \$PWD/centerplane.nii.gz 
