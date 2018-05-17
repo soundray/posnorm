@@ -60,7 +60,7 @@ done
 launchdir="$PWD"
 cd $td
 
-centre "$img" centred.nii.gz "$dof"
+centre "$img" centred.nii.gz "$dof" "Fast cubic bspline"
 
 if [[ -n "$ref" ]] 
 then
