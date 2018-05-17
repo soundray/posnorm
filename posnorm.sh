@@ -128,9 +128,9 @@ then
 	cp "$cdir"/neutral.dof.gz prepre.dof.gz
     fi
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
-    convert-dof pre-affine.dof.gz pre-rigid.dof.gz -output-format rigid
+    convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
-    flipreg masked.nii.gz ref.nii.gz pre-rigid.dof.gz mspalign.dof.gz > flipreg.log
+    flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign.dof.gz > flipreg.log
 else
     # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
