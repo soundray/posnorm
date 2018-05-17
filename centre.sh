@@ -11,7 +11,7 @@ usage () {
     Options:
 
     [-dofout centre.dof.gz] Output file to receive centring transformation
-    [-out centred.nii.gz] Output file to receive centre plane
+    [-out centred.nii.gz] Output file to receive centred image
     [-ref reference.nii.gz] Image to use as geometry template for output
     [-debug] Save temp directory to /$PWD before exit
         
@@ -65,9 +65,9 @@ centre "$img" centred.nii.gz "$dof"
 if [[ -n "$ref" ]] 
 then
     transform-image "$img" refcentred.nii.gz -target "$ref" -dofin "$dof" -interp "Fast cubic bspline"
-    cp refcentred.nii.gz "$out"
+    cp refcentred.nii.gz "$centred"
 else
-    cp centred.nii.gz "$out"
+    [[ -n $centred ]] && cp centred.nii.gz "$centred"
 fi
 
 exit 0
