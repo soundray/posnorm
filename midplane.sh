@@ -6,7 +6,7 @@ usage () {
     Usage: $pn -img 3d-image.nii.gz [options]
 
     Extracts the grid centre plane as a 3D image with xdim = 1 after applying the
-    transformation optionally given via -dofin. Writes to \$PWD/centerplane.nii.gz 
+    transformation optionally given via -dofin. Writes to \$PWD/centreplane.nii.gz 
     if -out not provided.
 
     Options:
@@ -36,7 +36,7 @@ which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
     
 img=
 dof=
-msp="$PWD"/centerplane.nii.gz
+msp="$PWD"/centreplane.nii.gz
 debug=0
 label=
 while [[ $# -gt 0 ]]

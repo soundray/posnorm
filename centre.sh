@@ -30,7 +30,7 @@ trap finish EXIT
 which help-rst >/dev/null || fatal "MIRTK not on $PATH"
 which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
 
-. $cdir/center-function.sh
+. $cdir/centre-function.sh
 
 [[ $# -eq 0 ]] && fatal "Parameter error" 
     

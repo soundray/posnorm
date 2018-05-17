@@ -1,4 +1,4 @@
-center () {
+centre () {
     f="$1" ; shift
     out="$1" ; shift
     dofout="$1" ; shift
