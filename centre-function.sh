@@ -16,7 +16,6 @@ centre () {
     trj=$(echo $gridj - $cogj | $cdir/wrap.bc )
     trk=$(echo $gridk - $cogk | $cdir/wrap.bc )
 
-    echo init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
     init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
 
     transform-image "$f" "$out" -dofin "$dofout" -interp "NN"
