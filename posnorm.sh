@@ -47,6 +47,10 @@ center () {
 flipreg () {
     input="$1" ; shift
     output="$1" ; shift
+    seg_maths $input -otsu -mul $input prepped.nii.gz 
+    # Subsample
+    resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
+    smooth-image resampled.nii.gz blurred.nii.gz 3
     reflect-image "$input" reflected.nii.gz -x
     register reflected.nii.gz "$input" -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-input-reflected.dof.gz 
     bisect-dof rreg-input-reflected.dof.gz "$output"
@@ -143,16 +147,8 @@ else
     transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
 
-seg_maths prepped1.nii.gz -otsu -mul prepped1.nii.gz prepped.nii.gz 
-
-# Subsample
-resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
-smooth-image resampled.nii.gz blurred.nii.gz 3
-
 # Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
-flipreg blurred.nii.gz mspalign.dof.gz > flipreg.log
-#flipreg prepped.nii.gz mspalign.dof.gz > flipreg.log
-#flipreg resampled.nii.gz mspalign.dof.gz > flipreg.log
+flipreg prepped1.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
 
