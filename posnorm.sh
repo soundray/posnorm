@@ -15,7 +15,7 @@ usage () {
     [-mask mask.nii.gz] Identify a region of interest 
     [-msp mid-sagittal-plane.nii.gz] File to receive the isolated midsagittal plane
     [-aligned aligned-3d.nii.gz] File to receive the aligned image volume 
-    [-debug] Copy temp directory to present working directory
+    [-debug] Copy temp directory to present working directory before exit
 
     "
 }
