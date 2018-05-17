@@ -19,5 +19,5 @@ center () {
     echo init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
     init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
 
-    transform-image "$f" "$out" -dofin "$dofout" -interp "Fast cubic bspline with padding"
+    transform-image "$f" "$out" -dofin "$dofout" -interp "NN"
 }
