@@ -38,7 +38,7 @@ flipreg () {
     # Generate new predof from translation and downscaling
     init-dof pre.dof.gz -tx $roundi -ty $roundj -tz $roundk -sx 200 -sy 200 -sz 200
     # Create subsampled image space
-    transform-image blurred.nii.gz resampled.nii.gz -Sp 0 -target $imgref -dofin pre.dof.gz -interp $interp
+    transform-image blurred.nii.gz resampled.nii.gz -Sp 0 -target $imgref -dofin pre.dof.gz -interp "$interp"
     reflect-image resampled.nii.gz reflected.nii.gz -x
     register reflected.nii.gz resampled.nii.gz -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-resampled-reflected.dof.gz 
     bisect-dof rreg-resampled-reflected.dof.gz "$output"
@@ -134,13 +134,13 @@ then
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
-    flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign.dof.gz $interp > flipreg.log
+    flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign.dof.gz "$interp" > flipreg.log
 else
     # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     centre masked.nii.gz prepped1.nii.gz pre.dof.gz
     # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
-    flipreg masked.nii.gz masked.nii.gz pre.dof.gz mspalign.dof.gz $interp > flipreg.log
+    flipreg masked.nii.gz masked.nii.gz pre.dof.gz mspalign.dof.gz "$interp" > flipreg.log
 fi
 
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
