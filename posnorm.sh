@@ -128,8 +128,10 @@ else
     cp image.nii.gz masked.nii.gz
 fi
 
+# Estimate the transformation that moves the image to the grid centre
 if [[ -n "$ref" ]] 
 then
+    # Estimate based on reference image
     [[ -e "$ref" ]] || fatal "Reference image file does not exist"
     cp "$ref" ref.nii.gz
     if [[ $mni -eq 1 ]] 
@@ -142,12 +144,13 @@ then
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
 else
+    # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     center masked.nii.gz prepped2.nii.gz pre.dof.gz
     transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
 
-# Estimate the linear transformation that aligns the MSP with the grid central sagittal plane
+# Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
 flipreg prepped1.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
