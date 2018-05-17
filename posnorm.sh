@@ -36,6 +36,7 @@ cdir=$(dirname "$0")
 . "$cdir"/common
 cdir=$(normalpath "$cdir")
 
+. "$cdir"/centre-function.sh
 . "$cdir"/midplane-function.sh
 
 pn=$(basename "$0")
@@ -122,7 +123,7 @@ then
 else
     # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
-    center masked.nii.gz prepped1.nii.gz pre.dof.gz
+    centre masked.nii.gz prepped1.nii.gz pre.dof.gz
 fi
 
 # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
