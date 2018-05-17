@@ -38,6 +38,7 @@ center () {
     trj=$(echo $gridj - $cogj | $cdir/wrap.bc )
     trk=$(echo $gridk - $cogk | $cdir/wrap.bc )
 
+    echo init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
     init-dof "$dofout" -rigid -tx $tri -ty $trj -tz $trk
 
     transform-image "$f" "$out" -dofin "$dofout" -interp "Fast cubic bspline with padding"
@@ -147,7 +148,6 @@ else
     # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     center masked.nii.gz prepped2.nii.gz pre.dof.gz
-    transform-image prepped2.nii.gz prepped1.nii.gz -dofin pre.dof.gz -interp "Fast linear with padding"
 fi
 
 # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
