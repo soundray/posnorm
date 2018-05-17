@@ -3,7 +3,7 @@ centre () {
     out="$1" ; shift
     dofout="$1" ; shift
     
-    read xdim ydim zdim <<< $($info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
+    read xdim ydim zdim <<< $(info $f | grep -w ^Image.dimensions | cut -d ' ' -f 4-6 )
 
     gridi=$[$xdim/2]
     gridj=$[$ydim/2]
