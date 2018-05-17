@@ -22,14 +22,24 @@ usage () {
 
 flipreg () {
     input="$1" ; shift
+    imgref="$1" ; shift
+    predof="$1" ; shift
     output="$1" ; shift
-    seg_maths $input -otsu -mul $input prepped.nii.gz 
-    # Subsample
-    resample-image prepped.nii.gz resampled.nii.gz -padding 0 -size 2 2 2 -interp "Fast cubic bspline with padding" 
-    smooth-image resampled.nii.gz blurred.nii.gz 3
-    reflect-image "$input" reflected.nii.gz -x
-    register reflected.nii.gz "$input" -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-input-reflected.dof.gz 
-    bisect-dof rreg-input-reflected.dof.gz "$output"
+    seg_maths $input -otsu -mul $input premasked.nii.gz 
+    smooth-image premasked.nii.gz blurred.nii.gz 3
+    # Get translation from predof and round to voxel units
+    read tri trj trk < <( $info $predof | grep ^tx | tr -s ' ' | cut -d ' ' -f 3,6,9 )
+    read dimi dimk dimj < <( $info $imgref | grep Voxel.dimensions | tr -s ' ' | cut -d ' ' -f 4-6 )
+    roundi=$( echo 'round(' $tri',' $dimi ')' | $cdir/wrap.bc )
+    roundj=$( echo 'round(' $trj',' $dimj ')' | $cdir/wrap.bc )
+    roundk=$( echo 'round(' $trk',' $dimk ')' | $cdir/wrap.bc )
+    # Generate new predof from translation and downscaling
+    init-dof pre.dof.gz -tx $roundi -ty $roundj -tz $roundk -sx 200 -sy 200 -sz 200
+    # Create subsampled image space
+    transform-image blurred.nii.gz resampled.nii.gz -Sp 0 -target $imgref -dofin pre.dof.gz -interp "Sinc with padding"
+    reflect-image resampled.nii.gz reflected.nii.gz -x
+    register reflected.nii.gz resampled.nii.gz -model Rigid -bg 0 -par "Final level" 2 -dofout rreg-resampled-reflected.dof.gz 
+    bisect-dof rreg-resampled-reflected.dof.gz "$output"
 }
 
 cdir=$(dirname "$0")
@@ -118,16 +128,16 @@ then
 	cp "$cdir"/neutral.dof.gz prepre.dof.gz
     fi
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
-    convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
-    transform-image masked.nii.gz prepped1.nii.gz -target ref.nii.gz -dofin pre.dof.gz -interp "Fast cubic bspline with padding"
+    convert-dof pre-affine.dof.gz pre-rigid.dof.gz -output-format rigid
+    # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
+    flipreg masked.nii.gz ref.nii.gz pre-rigid.dof.gz mspalign.dof.gz > flipreg.log
 else
     # Estimate based on centre of gravity
     [[ $cog -eq 1 ]] || fatal "Use -cog option or supply reference image with -ref"
     centre masked.nii.gz prepped1.nii.gz pre.dof.gz
+    # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
+    flipreg masked.nii.gz masked.nii.gz pre.dof.gz mspalign.dof.gz > flipreg.log
 fi
-
-# Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
-flipreg prepped1.nii.gz mspalign.dof.gz > flipreg.log
 
 compose-dofs pre.dof.gz mspalign.dof.gz "$outdof"
 

@@ -1,3 +1,19 @@
 #!/usr/bin/bc -l
 
 scale=10;
+
+define floor(x) {
+  auto os,xx;os=scale;scale=0
+  xx=x/1;if(xx>x)xx-=1
+  scale=os;return(xx)
+}
+
+define round(x,y) {
+  auto os,oib;
+  os=scale;oib=ibase
+  scale+=1;ibase=A
+    y*=floor(x/y+.5)
+  ibase=oib;scale=os
+  return y
+}
+
