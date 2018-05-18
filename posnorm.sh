@@ -36,7 +36,6 @@ flipreg () {
     roundj=$( echo 'round(' $trj',' $dimj ')' | $cdir/wrap.bc )
     roundk=$( echo 'round(' $trk',' $dimk ')' | $cdir/wrap.bc )
     # Generate new predof from translation and downscaling
-    init-dof pre.dof.gz -tx $roundi -ty $roundj -tz $roundk
     init-dof pre+scale.dof.gz -tx $roundi -ty $roundj -tz $roundk -sx 200 -sy 200 -sz 200
     # Create subsampled image space
     transform-image blurred.nii.gz resampled.nii.gz -Sp 0 -target $imgref -dofin pre+scale.dof.gz -interp "$interp"
