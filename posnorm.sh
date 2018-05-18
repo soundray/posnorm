@@ -31,12 +31,15 @@ flipreg () {
     smooth-image premasked.nii.gz blurred.nii.gz 3
     # Get translation from predof and round to voxel units
     read tri trj trk < <( $info $predof | grep ^tx | tr -s ' ' | cut -d ' ' -f 3,6,9 )
+    read rx < <( info pre.dof.gz | grep rx | tr -s ' ' | cut -d ' ' -f 3)
     read dimi dimk dimj < <( $info $imgref | grep Voxel.dimensions | tr -s ' ' | cut -d ' ' -f 4-6 )
     roundi=$( echo 'round(' $tri',' $dimi ')' | $cdir/wrap.bc )
     roundj=$( echo 'round(' $trj',' $dimj ')' | $cdir/wrap.bc )
     roundk=$( echo 'round(' $trk',' $dimk ')' | $cdir/wrap.bc )
-    # Generate new predof from translation and downscaling
-    init-dof pre+scale.dof.gz -tx $roundi -ty $roundj -tz $roundk -sx 200 -sy 200 -sz 200
+    # Replace predof with only translation and nodding
+    init-dof pre.dof.gz -tx $roundi -ty $roundj -tz $roundk -rx $rx
+    # Generate new predof from translation, nodding, and downscaling
+    init-dof pre+scale.dof.gz -tx $roundi -ty $roundj -tz $roundk -rx $rx -sx 200 -sy 200 -sz 200
     # Create subsampled image space
     transform-image blurred.nii.gz resampled.nii.gz -Sp 0 -target $imgref -dofin pre+scale.dof.gz -interp "$interp"
     reflect-image resampled.nii.gz reflected.nii.gz -x
