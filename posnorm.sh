@@ -138,7 +138,7 @@ then
     fi
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
     # Write the affine dof if option is set
-    [[ -n $affine ]] && cp prepre.dof.gz $affine 
+    [[ -n $affine ]] && cp pre-affine.dof.gz $affine 
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
     flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
@@ -157,19 +157,19 @@ compose-dofs pre.dof.gz mspalign1.dof.gz mspalign.dof.gz
 # compose-dofs mspalign1.dof.gz post.dof.gz mspalign.dof.gz
 
 cp mspalign.dof.gz "$outdof"
-
+set -vx
 if [[ -n "$msp" ]] ; then
     target=
-    [[ -n $ref ]] || target="-target $ref"
-    transform-image "$img" aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline"
+    [[ -n $ref ]] && target="-target $ref"
+    transform-image image.nii.gz aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline"
     midplane aligned.nii.gz msp.nii.gz
     cp msp.nii.gz "$msp"
 fi
 
 if [[ -n "$aligned" ]] ; then
     target=
-    [[ -n $ref ]] || target="-target $ref"
-    test -e aligned.nii.gz || transform-image "$img" aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline"
+    [[ -n $ref ]] && target="-target $ref"
+    test -e aligned.nii.gz || transform-image image.nii.gz aligned.nii.gz $target -dofin mspalign.dof.gz -interp "Fast cubic bspline"
     cp aligned.nii.gz "$aligned"
 fi
 
