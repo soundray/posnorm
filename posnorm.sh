@@ -157,7 +157,7 @@ compose-dofs pre.dof.gz mspalign1.dof.gz mspalign.dof.gz
 # compose-dofs mspalign1.dof.gz post.dof.gz mspalign.dof.gz
 
 cp mspalign.dof.gz "$outdof"
-set -vx
+
 if [[ -n "$msp" ]] ; then
     target=
     [[ -n $ref ]] && target="-target $ref"
