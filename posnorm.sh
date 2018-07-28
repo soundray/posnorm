@@ -15,6 +15,7 @@ usage () {
     [-mask mask.nii.gz] Identify a region of interest 
     [-msp mid-sagittal-plane.nii.gz] File to receive the isolated midsagittal plane
     [-aligned aligned-3d.nii.gz] File to receive the aligned image volume 
+    [-affine affine.dof.gz] File to receive the affine transformation (requires -ref)
     [-debug] Copy temp directory to present working directory before exit
     [-fast] Use fast cubic b-spline interpolation internally (less accurate)
 
@@ -71,6 +72,7 @@ ref=
 outdof="$PWD"/outputDOF.dof.gz
 msp=
 aligned=
+affine=
 mni=0
 interp="Sinc with padding"
 debug=0    
@@ -83,6 +85,7 @@ do
         -dofout)         outdof=$(normalpath "$2"); shift;;
         -msp)               msp=$(normalpath "$2"); shift;;
         -aligned)       aligned=$(normalpath "$2"); shift;;
+	-affine)         affine=$(normalpath "$2"); shift;;
         -fast)           interp="Fast cubic bspline with padding" ;;
         -cog)               cog=1 ;;
         -mni)               mni=1 ;;
@@ -134,6 +137,8 @@ then
 	cp "$cdir"/neutral.dof.gz prepre.dof.gz
     fi
     register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -par "Final level" 2 -dofout pre-affine.dof.gz >pre.log 2>&1
+    # Write the affine dof if option is set
+    [[ -n $affine ]] && cp prepre.dof.gz $affine 
     convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
     # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
     flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
