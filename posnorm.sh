@@ -90,14 +90,15 @@ then
 else
     cp orig0.nii.gz masked.nii.gz
 fi
+calculate-element-wise masked.nii.gz -clamp-percentiles 1 99 -o masked-clamped.nii.gz
 
 # Estimate translation that moves the image to the grid centre based on centre of gravity
-centre masked.nii.gz centre1.dof.gz > centre1.log 2>&1
+centre masked-clamped.nii.gz centre1.dof.gz > centre1.log 2>&1
 
 # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
 # Input centre1 translation to pre-centre
-flipreg masked.nii.gz centre1.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
-transform-image masked.nii.gz mspaligned1.nii.gz -dofin mspalign1.dof.gz -interp "Fast linear" 
+flipreg masked-clamped.nii.gz centre1.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
+transform-image masked-clamped.nii.gz mspaligned1.nii.gz -dofin mspalign1.dof.gz -interp "Fast linear" 
 
 # Estimate centering translation again with rotation-corrected image
 centre mspaligned1.nii.gz centre2.dof.gz >centre2.log

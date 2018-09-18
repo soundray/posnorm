@@ -69,7 +69,7 @@ msp=
 aligned=
 affine=
 mni=0
-interp="Fast cubic bspline with padding" ;;
+interp="Fast cubic bspline with padding" 
 debug=0    
 while [[ $# -gt 0 ]]
 do
@@ -116,10 +116,11 @@ if [[ -n "$mask" ]]
 then
     [[ -e "$mask" ]] || fatal "Mask image file does not exist"
     calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked1.nii.gz
-    edit-image masked1.nii.gz masked.nii.gz
+    edit-image masked1.nii.gz masked.nii.gz -origin 0 0 0
 else
     cp orig0.nii.gz masked.nii.gz
 fi
+calculate-element-wise masked.nii.gz -clamp-percentiles 1 99 -o masked-clamped.nii.gz
 
 [[ -n "$ref" ]] || fatal "Reference image is needed"
 
@@ -132,13 +133,13 @@ then
 else
     cp "$cdir"/neutral.dof.gz prepre.dof.gz
 fi
-register ref.nii.gz masked.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -levels 4 2 -dofout pre-affine.dof.gz >pre.log 2>&1
+register ref.nii.gz masked-clamped.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -levels 4 2 -dofout pre-affine.dof.gz >pre.log 2>&1
 # Write the affine dof if option is set
 [[ -n $affine ]] && cp pre-affine.dof.gz $affine 
 [[ -n $affonly ]] && exit 0
 convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
 # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
-flipreg masked.nii.gz ref.nii.gz pre.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
+flipreg masked-clamped.nii.gz ref.nii.gz pre.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
 
 compose-dofs mspalign1.dof.gz pre.dof.gz mspalign.dof.gz
 
