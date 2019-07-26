@@ -46,6 +46,7 @@ do
         -dofin)             dof=$(normalpath "$2"); shift;;
         -out)               msp=$(normalpath "$2"); shift;;
 	-ref)               ref=$(normalpath "$2"); shift;;
+	-nn)                 nn=1 ;;
         -debug)           debug=1 ;;
 	-label)           label="-labels" ;;
         --) shift; break;;
@@ -65,7 +66,9 @@ cd $td
 
 target=
 [[ -n "$ref" ]] && target="-target $ref" 
-transform-image "$img" aligned.nii.gz $label $target -dofin "$dof" -interp "Fast cubic bspline with padding"
+interp="Fast cubic bspline with padding"
+[[ $nn ]] && interp="NN"
+transform-image "$img" aligned.nii.gz $label $target -dofin "$dof" -interp "$interp"
 midplane aligned.nii.gz msp.nii.gz
 cp msp.nii.gz "$msp"
 
