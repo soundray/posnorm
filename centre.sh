@@ -18,17 +18,18 @@ usage () {
     "
 }
 
-cdir=$(dirname "$0")
-. "$cdir"/common
-cdir=$(normalpath "$cdir")
+ppath=$(realpath "$BASH_SOURCE")
+cdir=$(dirname "$ppath")
+pn=$(basename "$ppath")
 
-pn=$(basename "$0")
+. "$cdir"/common
+. "$cdir"/functions
 
 td=$(tempdir)
 trap finish EXIT
 
-which help-rst >/dev/null || fatal "MIRTK not on $PATH"
-which seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
+type mirtk >/dev/null || fatal "MIRTK not on $PATH"
+type seg_maths >/dev/null || fatal "NiftySeg not on $PATH"
 
 . $cdir/centre-function.sh
 
@@ -41,10 +42,10 @@ label=
 while [[ $# -gt 0 ]]
 do
     case "$1" in
-        -img)               img=$(normalpath "$2"); shift;;
-        -dofout)            dof=$(normalpath "$2"); shift;;
-        -out)           centred=$(normalpath "$2"); shift;;
-	-ref)               ref=$(normalpath "$2"); shift;;
+        -img)               img=$(realpath "$2"); shift;;
+        -dofout)            dof=$(realpath "$2"); shift;;
+        -out)           centred=$(realpath "$2"); shift;;
+	-ref)               ref=$(realpath "$2"); shift;;
         -debug)           debug=1 ;;
         --) shift; break;;
         -*)
@@ -64,7 +65,7 @@ centre "$img" centred.nii.gz "$dof" "Fast cubic bspline"
 
 if [[ -n "$ref" ]] 
 then
-    transform-image "$img" refcentred.nii.gz -target "$ref" -dofin "$dof" -interp "Fast cubic bspline"
+    mirtk transform-image "$img" refcentred.nii.gz -target "$ref" -dofin "$dof" -interp "Fast cubic bspline"
     cp refcentred.nii.gz "$centred"
 else
     [[ -n $centred ]] && cp centred.nii.gz "$centred"

@@ -18,11 +18,12 @@ usage () {
     "
 }
 
-cdir=$(dirname "$0")
-. "$cdir"/common
-cdir=$(normalpath "$cdir")
+ppath=$(realpath "$BASH_SOURCE")
+cdir=$(dirname "$ppath")
+pn=$(basename "$ppath")
 
-pn=$(basename "$0")
+. "$cdir"/common
+. "$cdir"/functions
 
 td=$(tempdir)
 trap finish EXIT
@@ -42,10 +43,10 @@ label=
 while [[ $# -gt 0 ]]
 do
     case "$1" in
-        -img)               img=$(normalpath "$2"); shift;;
-        -dofin)             dof=$(normalpath "$2"); shift;;
-        -out)               msp=$(normalpath "$2"); shift;;
-	-ref)               ref=$(normalpath "$2"); shift;;
+        -img)               img=$(realpath "$2"); shift;;
+        -dofin)             dof=$(realpath "$2"); shift;;
+        -out)               msp=$(realpath "$2"); shift;;
+	-ref)               ref=$(realpath "$2"); shift;;
 	-nn)                 nn=1 ;;
         -debug)           debug=1 ;;
 	-label)           label="-labels" ;;

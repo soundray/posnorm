@@ -28,24 +28,26 @@ flipreg () {
     local output="$1" ; shift
     local interp="$1" ; shift
     seg_maths $input -otsu -mul $input premasked.nii.gz 
-    smooth-image premasked.nii.gz blurred.nii.gz 3
+    mirtk smooth-image premasked.nii.gz blurred.nii.gz 3
     seg_maths blurred.nii.gz -otsu -sub 1 -add blurred.nii.gz blurred-negbg.nii.gz    
     # Get translation and nodding rotation from predof
-    read tri trj trk < <( $info $predof | grep ^tx | tr -s ' ' | cut -d ' ' -f 3,6,9 )
-    read rx < <( $info $predof | grep rx | tr -s ' ' | cut -d ' ' -f 3)
+    read tri trj trk < <( mirtk info $predof | grep ^tx | tr -s ' ' | cut -d ' ' -f 3,6,9 )
+    read rx < <( mirtk info $predof | grep rx | tr -s ' ' | cut -d ' ' -f 3)
     # Generate new predof from translation, nodding, and downscaling
-    init-dof pre+scale.dof.gz -tx $tri -ty $trj -tz $trk -rx $rx -sx 200 -sy 200 -sz 200
+    mirtk init-dof pre+scale.dof.gz -tx $tri -ty $trj -tz $trk -rx $rx -sx 200 -sy 200 -sz 200
     # Create subsampled image space
-    transform-image blurred.nii.gz resampled.nii.gz -Sp -1 -target $imgref -dofin pre+scale.dof.gz -interp "$interp"
-    reflect-image resampled.nii.gz reflected.nii.gz -x
-    register reflected.nii.gz resampled.nii.gz -model Rigid -bg 0 -levels 4 2 -dofout rreg-resampled-reflected.dof.gz 
-    bisect-dof rreg-resampled-reflected.dof.gz "$output"
+    mirtk transform-image blurred.nii.gz resampled.nii.gz -Sp -1 -target $imgref -dofin pre+scale.dof.gz -interp "$interp"
+    mirtk reflect-image resampled.nii.gz reflected.nii.gz -x
+    mirtk register reflected.nii.gz resampled.nii.gz -model Rigid -bg 0 -levels 4 2 -dofout rreg-resampled-reflected.dof.gz 
+    mirtk bisect-dof rreg-resampled-reflected.dof.gz "$output"
 }
 
-cdir=$(dirname "$0")
-. "$cdir"/common
-cdir=$(normalpath "$cdir")
 
+ppath=$(realpath "$BASH_SOURCE")
+cdir=$(dirname "$ppath")
+pn=$(basename "$ppath")
+
+. "$cdir"/common
 . "$cdir"/centre-function.sh
 . "$cdir"/midplane-function.sh
 
@@ -55,9 +57,8 @@ td=$(tempdir)
 trap finish EXIT
 echo $pn $* >$td/commandline.log
 
-mirtkhelp=$(which help-rst 2>&1) || fatal "MIRTK not on PATH"
-info=$(dirname "$mirtkhelp")/info
-which seg_maths >/dev/null || fatal "NiftySeg not on PATH"
+type mirtk >/dev/null || fatal "MIRTK not on PATH"
+type seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
 [[ $# -gt 0 ]] || fatal "Parameter error" 
 
@@ -74,13 +75,13 @@ debug=0
 while [[ $# -gt 0 ]]
 do
     case "$1" in
-        -img)               img=$(normalpath "$2"); shift;;
-        -mask)             mask=$(normalpath "$2"); shift;;
-        -ref)               ref=$(normalpath "$2"); shift;;
-        -dofout)         outdof=$(normalpath "$2"); shift;;
-        -msp)               msp=$(normalpath "$2"); shift;;
-        -aligned)       aligned=$(normalpath "$2"); shift;;
-	-affine)         affine=$(normalpath "$2"); shift;;
+        -img)               img=$(realpath "$2"); shift;;
+        -mask)             mask=$(realpath "$2"); shift;;
+        -ref)               ref=$(realpath "$2"); shift;;
+        -dofout)         outdof=$(realpath "$2"); shift;;
+        -msp)               msp=$(realpath "$2"); shift;;
+        -aligned)       aligned=$(realpath "$2"); shift;;
+	-affine)         affine=$(realpath "$2"); shift;;
 	-affineonly)    affonly=1 ;;
         -mni)               mni=1 ;;
         -debug)           debug=1 ;;
@@ -95,9 +96,9 @@ if [[ $# -gt 0 ]]
 then
     if [[ $# -eq 3 ]] ## old-style invocation 
     then
-	img=$(normalpath "$1") ; shift
-	mask=$(normalpath "$1") ; shift
-	outdof=$(normalpath "$1") ; shift
+	img=$(realpath "$1") ; shift
+	mask=$(realpath "$1") ; shift
+	outdof=$(realpath "$1") ; shift
     else
 	fatal "Parameter error" 
     fi
@@ -110,17 +111,17 @@ launchdir="$PWD"
 cd $td
 
 cp "$img" image.nii.gz
-edit-image image.nii.gz orig0.nii.gz -origin 0 0 0
+mirtk edit-image image.nii.gz orig0.nii.gz -origin 0 0 0
 
 if [[ -n "$mask" ]] 
 then
     [[ -e "$mask" ]] || fatal "Mask image file does not exist"
-    calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked1.nii.gz
-    edit-image masked1.nii.gz masked.nii.gz -origin 0 0 0
+    mirtk calculate-element-wise image.nii.gz -mask "$mask" 0 -pad 0 -o masked1.nii.gz
+    mirtk edit-image masked1.nii.gz masked.nii.gz -origin 0 0 0
 else
     cp orig0.nii.gz masked.nii.gz
 fi
-calculate-element-wise masked.nii.gz -clamp-percentiles 1 99 -o masked-clamped.nii.gz
+mirtk calculate-element-wise masked.nii.gz -clamp-percentiles 1 99 -o masked-clamped.nii.gz
 
 [[ -n "$ref" ]] || fatal "Reference image is needed"
 
@@ -133,26 +134,26 @@ then
 else
     cp "$cdir"/neutral.dof.gz prepre.dof.gz
 fi
-register ref.nii.gz masked-clamped.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -levels 4 2 -dofout pre-affine.dof.gz >pre.log 2>&1
+mirtk register ref.nii.gz masked-clamped.nii.gz -bg 0 -model Affine -dofin prepre.dof.gz -levels 4 2 -dofout pre-affine.dof.gz >pre.log 2>&1
 # Write the affine dof if option is set
 [[ -n $affine ]] && cp pre-affine.dof.gz $affine 
 [[ -n $affonly ]] && exit 0
-convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
+mirtk convert-dof pre-affine.dof.gz pre.dof.gz -output-format rigid
 # Estimate the rigid transformation that aligns the MSP with the grid central sagittal plane
 flipreg masked-clamped.nii.gz ref.nii.gz pre.dof.gz mspalign1.dof.gz "$interp" > flipreg.log
 
-compose-dofs mspalign1.dof.gz pre.dof.gz mspalign.dof.gz
+mirtk compose-dofs mspalign1.dof.gz pre.dof.gz mspalign.dof.gz
 
 cp mspalign.dof.gz "$outdof"
 
 if [[ -n "$msp" ]] ; then
-    transform-image orig0.nii.gz aligned.nii.gz -target ref.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline"
+    mirtk transform-image orig0.nii.gz aligned.nii.gz -target ref.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline"
     midplane aligned.nii.gz msp.nii.gz
     cp msp.nii.gz "$msp"
 fi
 
 if [[ -n "$aligned" ]] ; then
-    test -e aligned.nii.gz || transform-image orig0.nii.gz aligned.nii.gz -target ref.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline"
+    test -e aligned.nii.gz || mirtk transform-image orig0.nii.gz aligned.nii.gz -target ref.nii.gz -dofin mspalign.dof.gz -interp "Fast cubic bspline"
     cp aligned.nii.gz "$aligned"
 fi
 
