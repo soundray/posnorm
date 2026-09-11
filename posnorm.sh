@@ -29,6 +29,9 @@ pn=$(basename "$ppath")
 
 pn=$(basename "$0")
 
+launchdir="$PWD"
+debug=0
+
 td=$(tempdir)
 trap finish EXIT
 echo $pn $* >$td/commandline.log
@@ -36,15 +39,14 @@ echo $pn $* >$td/commandline.log
 type mirtk >/dev/null || fatal "MIRTK not on PATH"
 type seg_maths >/dev/null || fatal "NiftySeg not on PATH"
 
-[[ $# -gt 0 ]] || fatal "Parameter error" 
-
+[[ $# -gt 0 ]] || fatal "Parameter error"
 img=
 mask=
 outdof="$PWD"/outputDOF.dof.gz
 msp=
 aligned=
 interp="Fast cubic bspline with padding"
-debug=0    
+
 while [[ $# -gt 0 ]]
 do
     case "$1" in
@@ -76,7 +78,6 @@ fi
 [[ -n "$img" ]] || fatal "Input image is needed"
 [[ -e "$img" ]] || fatal "posnorm input file does not exist"
 
-launchdir="$PWD"
 cd $td
 
 cp "$img" image.nii.gz
